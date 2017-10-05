@@ -1,14 +1,13 @@
 package rais.friendmanagement.rest;
 
-import com.google.common.collect.ImmutableMap;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rais.friendmanagement.rest.dto.request.ListOfTwoEmailsRequestDto;
+import rais.friendmanagement.rest.dto.response.SuccessResponseDto;
 
 /**
  *
@@ -20,8 +19,8 @@ import rais.friendmanagement.rest.dto.request.ListOfTwoEmailsRequestDto;
 public class FriendRestController {
 
     @PostMapping("/connect")
-    public ResponseEntity connect(@RequestBody @Valid ListOfTwoEmailsRequestDto req) {
+    public SuccessResponseDto connect(@RequestBody @Valid ListOfTwoEmailsRequestDto req) {
         log.debug("[connect]-request={}", req);
-        return ResponseEntity.ok(ImmutableMap.of("success", true));
+        return new SuccessResponseDto();
     }
 }

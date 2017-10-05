@@ -2,6 +2,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import static org.hamcrest.CoreMatchers.is;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -52,4 +53,33 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.success").value(true));
     }
 
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_UnreadableRequestApiException() throws Exception {
+        String json = "asdf";
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)));
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_InvalidRequestApiException_NotNull() throws Exception {
+        String json = "{}";
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)));
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_InvalidRequestApiException_Size() throws Exception {
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com")));
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)));
+    }
 }
