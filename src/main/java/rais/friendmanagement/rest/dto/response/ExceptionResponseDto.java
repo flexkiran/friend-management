@@ -13,7 +13,14 @@ import org.springframework.http.HttpStatus;
 public class ExceptionResponseDto extends BaseResponseDto {
 
     public ExceptionResponseDto() {
-        super(false, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        super(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    // error code
+    private String error;
+    // error message
+    private String message;
+    // error message language
+    private String lang;
 
 }

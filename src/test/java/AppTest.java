@@ -2,9 +2,11 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.Locale;
 import static org.hamcrest.CoreMatchers.is;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -56,21 +58,27 @@ public class AppTest extends AbstractTestNGSpringContextTests {
     @Test(groups = "/friend/connect")
     public void createFriendConnection_UnreadableRequestApiException() throws Exception {
         String json = "asdf";
-        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+        Locale locale = new Locale("in");
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success", is(false)));
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("901")))
+                .andExpect(jsonPath("$.message", is("Data tidak dapat diproses")));
     }
 
     @Test(groups = "/friend/connect")
     public void createFriendConnection_InvalidRequestApiException_NotNull() throws Exception {
         String json = "{}";
-        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+        Locale locale = Locale.ENGLISH;
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success", is(false)));
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("902")))
+                .andExpect(jsonPath("$.message", is("Message not valid")));
     }
 
     @Test(groups = "/friend/connect")

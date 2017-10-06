@@ -1,6 +1,7 @@
 package rais.friendmanagement.rest.dto.response;
 
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 /**
  * Base Api Response Data. Every Api response should return this or extend this
@@ -16,9 +17,9 @@ public class BaseResponseDto {
     // http status
     private int status;
 
-    public BaseResponseDto(boolean success, int httpStatus) {
+    public BaseResponseDto(boolean success, HttpStatus httpStatus) {
         this.success = success;
-        this.status = httpStatus;
+        this.status = httpStatus.value();
     }
 
 }

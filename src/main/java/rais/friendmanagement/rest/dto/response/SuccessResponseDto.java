@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public class SuccessResponseDto extends BaseResponseDto {
 
     public SuccessResponseDto() {
-        super(true, HttpStatus.OK.value());
+        super(true, HttpStatus.OK);
     }
 
 }
