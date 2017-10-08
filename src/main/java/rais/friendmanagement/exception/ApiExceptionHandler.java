@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import rais.friendmanagement.rest.dto.response.ExceptionResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import rais.friendmanagement.dao.ErrorLog;
 import rais.friendmanagement.rest.dto.response.ExceptionResponseDto.ValidationError;
+import rais.friendmanagement.service.ErrorLogService;
 
 /**
  * Encapsulate response into ExceptionResponseDto
@@ -62,13 +65,23 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return createResponseEntity(ex, req);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseBody
+    protected ResponseEntity handleRuntimeException(RuntimeException ex, WebRequest req) {
+        log.debug("[handleRuntimeException]-");
+        return createResponseEntity(ex, req);
+    }
+
+    @Autowired
+    private ErrorLogService errorLogService;
+
     private ResponseEntity createResponseEntity(Exception ex, WebRequest req) {
         log.debug("[createResponseEntity]-class={}", ex.getClass());
         ExceptionResponseDto body = new ExceptionResponseDto();
+        Locale locale = resolveLocale(req);
         if (ex instanceof ApiException) {
             ApiException ax = (ApiException) ex;
             body.setError(ax.getErrorCode());
-            Locale locale = resolveLocale(req);
             body.setMessage(ax.getLocalizedMessage(locale));
             body.setLang(locale.getLanguage());
         } else {
@@ -76,6 +89,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             body.setError("900");
             body.setMessage(ex.getMessage());
         }
+        // set error info page link
+        String errorInfo = "/errors/" + body.getError() + "?lang=" + locale.getLanguage();
+        // save stacktrace for unexpected exception and add it to error info link
+        if ("900".equals(body.getError())) {
+            ErrorLog errorLog = errorLogService.saveException(ex);
+            errorInfo += "&logId=" + errorLog.getId();
+        }
+        body.setErrorInfo(errorInfo);
+
         // from handleMethodArgumentNotValid
         if (ex.getCause() instanceof MethodArgumentNotValidException) {
             MethodArgumentNotValidException manve = (MethodArgumentNotValidException) ex.getCause();

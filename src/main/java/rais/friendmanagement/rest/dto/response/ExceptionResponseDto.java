@@ -23,6 +23,8 @@ public class ExceptionResponseDto extends BaseResponseDto {
     private String message;
     // error message language
     private String lang;
+    // error info page link
+    private String errorInfo;
     // validation errors
     private List<ValidationError> validationErrors;
 

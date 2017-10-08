@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Error Info</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        <h1>
+            <span th:text="'Error ' + ${errorCode}"></span>
+        </h1>
+        <h3>Message</h3>
+        <div>
+            <span th:text="${errorMessage}"></span>
+        </div>
+        <div th:if="${errorLog != null}">
+            <br />
+            <h3>Timestamp</h3>
+            <div>
+                <span th:text="${errorLog.logTimestamp}"></span>
+            </div>
+            <br />
+            <h3>Stack Trace</h3>
+            <div style="white-space: pre-wrap;" th:text="${errorLog.stackTrace}">
+            </div>
+        </div>
+    </body>
+</html>
