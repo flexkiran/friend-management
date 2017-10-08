@@ -12,4 +12,6 @@ public interface FriendConnectionService {
     Friend createFriendConnection(String email1, String email2);
 
     List<String> retrieveFriends(String email);
+
+    List<String> retrieveCommonFriends(String email1, String email2);
 }

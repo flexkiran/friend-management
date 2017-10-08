@@ -73,10 +73,14 @@ public class AppTest extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "/friend/connect")
     public void createFriendConnection_Success() throws Exception {
-        List<String> friends = Arrays.asList("andy@example.com", "john@example.com");
-        for (String email : friends) {
-            registerEmail_Success(email);
-        }
+        String email1 = "andy@example.com", email2 = "john@example.com";
+        registerEmail_Success(email1);
+        registerEmail_Success(email2);
+        createFriendConnection_Success(email1, email2);
+    }
+
+    public void createFriendConnection_Success(String email1, String email2) throws Exception {
+        List<String> friends = Arrays.asList(email1, email2);
         String json = toJson(ImmutableMap.of("friends", friends));
         mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -218,5 +222,23 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.error", is("904")))
                 .andExpect(jsonPath("$.message", is("Email tidak terdaftar")));
+    }
+
+    @Test(groups = "/friend/common", dependsOnGroups = {"/friend/list"})
+    public void retrieveCommonFriends() throws Exception {
+        // register common@example.com
+        registerEmail_Success("common@example.com");
+        // create friend connection 
+        createFriendConnection_Success("andy@example.com", "common@example.com");
+        createFriendConnection_Success("john@example.com", "common@example.com");
+        // retieve common friends 
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com", "john@example.com")));
+        mockMvc.perform(post("/friend/common").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.count").value(1))
+                .andExpect(jsonPath("$.friends[0]", is("common@example.com")));
     }
 }

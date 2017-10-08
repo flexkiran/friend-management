@@ -51,4 +51,11 @@ public class FriendRestController {
         List<String> friends = friendService.retrieveFriends(req.getEmail());
         return new ListEmailResponseDto(friends);
     }
+
+    @PostMapping("/common")
+    public ListEmailResponseDto retrieveCommonFriends(@RequestBody @Valid ListOfTwoEmailsRequestDto req) {
+        log.debug("[retrieveCommonFriends]-request={}", req);
+        List<String> friends = friendService.retrieveCommonFriends(req.getFriends().get(0), req.getFriends().get(1));
+        return new ListEmailResponseDto(friends);
+    }
 }
