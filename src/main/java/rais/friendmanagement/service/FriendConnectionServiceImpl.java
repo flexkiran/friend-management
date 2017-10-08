@@ -1,5 +1,6 @@
 package rais.friendmanagement.service;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -42,4 +43,10 @@ public class FriendConnectionServiceImpl implements FriendConnectionService {
         return friendRepo.save(friend);
     }
 
+    @Override
+    public List<String> retrieveFriends(String email) {
+        log.debug("[retrieveFriendList]-email={}", email);
+        personService.findByEmailOrThrowEmailNotRegisteredApiException(email);
+        return friendRepo.findAllFriendsEmail(email);
+    }
 }

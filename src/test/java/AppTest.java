@@ -182,4 +182,41 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error").value("905"));
     }
+
+    @Test(groups = "/friend/list", dependsOnGroups = "/friend/connect")
+    public void retrieveFriendList_andy() throws Exception {
+        String json = "{\"email\":\"andy@example.com\"}";
+        mockMvc.perform(post("/friend/list").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(true)))
+                .andExpect(jsonPath("$.count", is(1)))
+                .andExpect(jsonPath("$.friends[0]", is("john@example.com")));
+    }
+
+    @Test(groups = "/friend/list", dependsOnGroups = "/friend/connect")
+    public void retrieveFriendList_john() throws Exception {
+        String json = "{\"email\":\"john@example.com\"}";
+        mockMvc.perform(post("/friend/list").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(true)))
+                .andExpect(jsonPath("$.count", is(1)))
+                .andExpect(jsonPath("$.friends[0]", is("andy@example.com")));
+    }
+
+    @Test(groups = "/friend/list")
+    public void retrieveFriendList_EmailNotRegisteredApiException() throws Exception {
+        String json = "{\"email\":\"asdf@fdsa.asdf\"}";
+        Locale locale = new Locale("in");
+        mockMvc.perform(post("/friend/list").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("904")))
+                .andExpect(jsonPath("$.message", is("Email tidak terdaftar")));
+    }
 }

@@ -1,5 +1,6 @@
 package rais.friendmanagement.rest;
 
+import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rais.friendmanagement.rest.dto.request.ListOfTwoEmailsRequestDto;
+import rais.friendmanagement.rest.dto.request.SingleEmailRequestDto;
+import rais.friendmanagement.rest.dto.response.ListEmailResponseDto;
 import rais.friendmanagement.rest.dto.response.SuccessResponseDto;
 import rais.friendmanagement.service.FriendConnectionService;
 import rais.friendmanagement.validation.ListOfTwoEmailsRequestDtoValidator;
@@ -40,5 +43,12 @@ public class FriendRestController {
         log.debug("[connect]-request={}", req);
         friendService.createFriendConnection(req.getFriends().get(0), req.getFriends().get(1));
         return new SuccessResponseDto();
+    }
+
+    @PostMapping("/list")
+    public ListEmailResponseDto retrieveFriendList(@RequestBody @Valid SingleEmailRequestDto req) {
+        log.debug("[retrieveFriendList]-request={}", req);
+        List<String> friends = friendService.retrieveFriends(req.getEmail());
+        return new ListEmailResponseDto(friends);
     }
 }
