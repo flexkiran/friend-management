@@ -2,6 +2,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import static org.hamcrest.CoreMatchers.is;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +46,38 @@ public class AppTest extends AbstractTestNGSpringContextTests {
         return objectMapper.writeValueAsString(o);
     }
 
+    public void registerEmail_Success(String email) throws Exception {
+        String json = toJson(ImmutableMap.of("email", email));
+        mockMvc.perform(post("/person/register").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test(groups = "/person/register")
+    public void registerEmail_EmailRegisterRepeatedApiException() throws Exception {
+        String json = toJson(ImmutableMap.of("email", "zxcv@example.com"));
+        mockMvc.perform(post("/person/register").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true));
+        mockMvc.perform(post("/person/register").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("903"));
+    }
+
     @Test(groups = "/friend/connect")
     public void createFriendConnection() throws Exception {
-        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com", "john@example.com")));
+        List<String> friends = Arrays.asList("andy@example.com", "john@example.com");
+        for (String email : friends) {
+            registerEmail_Success(email);
+        }
+        String json = toJson(ImmutableMap.of("friends", friends));
         mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
