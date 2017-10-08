@@ -241,4 +241,30 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.friends[0]", is("common@example.com")));
     }
+
+    @Test(groups = "/friend/subscribe")
+    public void createSubscription_Success() throws Exception {
+        registerEmail_Success("lisa@example.com");
+        createSubscription_Success("lisa@example.com", "john@example.com");
+    }
+
+    public void createSubscription_Success(String requestor, String target) throws Exception {
+        String json = toJson(ImmutableMap.of("requestor", requestor, "target", target));
+        mockMvc.perform(post("/friend/subscribe").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test(groups = "/friend/subscribe", dependsOnMethods = "createSubscription_Success")
+    public void createSubscription_SubscriptionRequestRepeatedApiException() throws Exception {
+        String json = toJson(ImmutableMap.of("requestor", "lisa@example.com", "target", "john@example.com"));
+        mockMvc.perform(post("/friend/subscribe").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("906"));
+    }
 }
