@@ -72,7 +72,7 @@ public class AppTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "/friend/connect")
-    public void createFriendConnection() throws Exception {
+    public void createFriendConnection_Success() throws Exception {
         List<String> friends = Arrays.asList("andy@example.com", "john@example.com");
         for (String email : friends) {
             registerEmail_Success(email);
@@ -157,5 +157,29 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.lang", is("en")))
                 .andExpect(jsonPath("$.message", is("Message not valid")))
                 .andExpect(jsonPath("$.validationErrors[?(@.field == 'friends[1]' && @.message == \"'andy@example.com' is not unique\")]").exists());
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_EmailNotRegisteredApiException() throws Exception {
+        List<String> friends = Arrays.asList("qwerty@example.com", "ytrewq@example.com");
+        String json = toJson(ImmutableMap.of("friends", friends));
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("904"));
+    }
+
+    @Test(groups = "/friend/connect", dependsOnMethods = "createFriendConnection_Success")
+    public void createFriendConnection_FriendConnectionRequestRepeatedApiException() throws Exception {
+        List<String> friends = Arrays.asList("andy@example.com", "john@example.com");
+        String json = toJson(ImmutableMap.of("friends", friends));
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("905"));
     }
 }

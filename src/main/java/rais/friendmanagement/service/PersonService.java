@@ -9,4 +9,6 @@ import rais.friendmanagement.dao.Person;
 public interface PersonService {
 
     Person register(String email);
+
+    Person findByEmailOrThrowEmailNotRegisteredApiException(String email);
 }

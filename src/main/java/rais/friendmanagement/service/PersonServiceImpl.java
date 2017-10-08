@@ -24,4 +24,13 @@ public class PersonServiceImpl implements PersonService {
         }
         return personRepo.save(new Person(email));
     }
+
+    @Override
+    public Person findByEmailOrThrowEmailNotRegisteredApiException(String email) {
+        Person p = personRepo.findByEmail(email);
+        if (p == null) {
+            throw new EmailNotRegisteredApiException();
+        }
+        return p;
+    }
 }

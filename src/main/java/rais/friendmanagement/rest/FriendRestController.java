@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rais.friendmanagement.rest.dto.request.ListOfTwoEmailsRequestDto;
 import rais.friendmanagement.rest.dto.response.SuccessResponseDto;
+import rais.friendmanagement.service.FriendConnectionService;
 import rais.friendmanagement.validation.ListOfTwoEmailsRequestDtoValidator;
 
 /**
@@ -22,6 +23,8 @@ import rais.friendmanagement.validation.ListOfTwoEmailsRequestDtoValidator;
 @Slf4j
 public class FriendRestController {
 
+    @Autowired
+    private FriendConnectionService friendService;
     @Autowired
     private ListOfTwoEmailsRequestDtoValidator listOfTwoEmailRequestDtoValidator;
 
@@ -35,6 +38,7 @@ public class FriendRestController {
     @PostMapping("/connect")
     public SuccessResponseDto connect(@RequestBody @Valid ListOfTwoEmailsRequestDto req) {
         log.debug("[connect]-request={}", req);
+        friendService.createFriendConnection(req.getFriends().get(0), req.getFriends().get(1));
         return new SuccessResponseDto();
     }
 }
