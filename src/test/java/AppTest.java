@@ -308,4 +308,23 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.error", is("908")))
                 .andExpect(jsonPath("$.message", is("Blocked friend")));
     }
+
+    @Test(groups = "/updates", dependsOnGroups = {"/friend/block"})
+    public void retrieveUpdatesReceiver_Success() throws Exception {
+        // register kate
+        registerEmail_Success("kate@example.com");
+
+        // post updates
+        String json = "{"
+                + "\"sender\":\"john@example.com\""
+                + ",\"text\":\"Hello World! kate@example.com\""
+                + "}";
+        mockMvc.perform(post("/updates").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.recipients[?(@ == 'lisa@example.com')]").exists())
+                .andExpect(jsonPath("$.recipients[?(@ == 'kate@example.com')]").exists());
+    }
 }

@@ -34,4 +34,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionRepo.save(subs);
     }
 
+    @Override
+    public List<String> retrieveSubscribers(String email) {
+        log.debug("[retrieveSubscribers]-email={}", email);
+        return subscriptionRepo.findAllRequestorEmailsByEmailTarget(email);
+    }
+
 }

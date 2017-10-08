@@ -1,5 +1,6 @@
 package rais.friendmanagement.service;
 
+import java.util.List;
 import rais.friendmanagement.dao.Blocking;
 
 /**
@@ -11,4 +12,6 @@ public interface BlockingService {
     Blocking block(String emailTarget, String emailRequestor);
 
     boolean isBlocked(String emailTarget, String emailRequestor);
+
+    List<String> getAllEmailsWhichAreBlockingTheEmailTarget(String emailRequestor);
 }

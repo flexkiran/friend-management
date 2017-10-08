@@ -12,4 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SubscriptionRepo extends JpaRepository<Subscription, Subscription.SubscribePk> {
 
+    @Query("select s.requestor.email"
+            + " from Subscription s"
+            + " join s.requestor r"
+            + " join s.target t"
+            + " where t.email = ?1")
+    List<String> findAllRequestorEmailsByEmailTarget(String emailTarget);
+
 }

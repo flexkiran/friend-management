@@ -1,5 +1,6 @@
 package rais.friendmanagement.service;
 
+import java.util.List;
 import rais.friendmanagement.dao.Subscription;
 
 /**
@@ -9,5 +10,7 @@ import rais.friendmanagement.dao.Subscription;
 public interface SubscriptionService {
 
     Subscription subscribe(String emailTarget, String emailRequestor);
+
+    List<String> retrieveSubscribers(String email);
 
 }

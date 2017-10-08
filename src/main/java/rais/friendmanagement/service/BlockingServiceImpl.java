@@ -1,5 +1,6 @@
 package rais.friendmanagement.service;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -41,5 +42,15 @@ public class BlockingServiceImpl implements BlockingService {
         boolean blocked = blockingRepo.exists(Example.of(blocking));
         log.debug("[isBlocked]-emailTarget={}, emailRequestor={}, blocked={}", emailTarget, emailRequestor, blocked);
         return blocked;
+    }
+
+    /**
+     * Return all emails which are blocking the emailTarget
+     */
+    @Override
+    public List<String> getAllEmailsWhichAreBlockingTheEmailTarget(String emailTarget) {
+        List<String> list = blockingRepo.findAllRequestorEmailsByEmailTarget(emailTarget);
+        log.debug("[getAllEmailsWhichAreBlockingTheEmailTarget]-emailTarget={}, result={}", emailTarget, list);
+        return list;
     }
 }
