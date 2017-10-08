@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import rais.friendmanagement.dao.Friend;
 import rais.friendmanagement.dao.FriendRepo;
 import rais.friendmanagement.dao.Person;
+import rais.friendmanagement.exception.BlockedFriendApiException;
 import rais.friendmanagement.exception.FriendConnectionRequestRepeatedApiException;
 
 /**
@@ -23,6 +24,8 @@ public class FriendConnectionServiceImpl implements FriendConnectionService {
     private FriendRepo friendRepo;
     @Autowired
     private PersonService personService;
+    @Autowired
+    private BlockingService blockingService;
 
     @Override
     public Friend createFriendConnection(String email1, String email2) {
@@ -40,6 +43,9 @@ public class FriendConnectionServiceImpl implements FriendConnectionService {
         }
         if (friendRepo.exists(Example.of(friend))) {
             throw new FriendConnectionRequestRepeatedApiException();
+        }
+        if (blockingService.isBlocked(email1, email2) || blockingService.isBlocked(email2, email1)) {
+            throw new BlockedFriendApiException();
         }
         return friendRepo.save(friend);
     }

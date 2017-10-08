@@ -16,6 +16,7 @@ import rais.friendmanagement.rest.dto.request.TargetRequestorRequestDto;
 import rais.friendmanagement.rest.dto.response.BaseResponseDto;
 import rais.friendmanagement.rest.dto.response.ListEmailResponseDto;
 import rais.friendmanagement.rest.dto.response.SuccessResponseDto;
+import rais.friendmanagement.service.BlockingService;
 import rais.friendmanagement.service.FriendConnectionService;
 import rais.friendmanagement.service.SubscriptionService;
 import rais.friendmanagement.validation.ListOfTwoEmailsRequestDtoValidator;
@@ -33,6 +34,8 @@ public class FriendRestController {
     private FriendConnectionService friendService;
     @Autowired
     private SubscriptionService subscriptionService;
+    @Autowired
+    private BlockingService blockingService;
     @Autowired
     private ListOfTwoEmailsRequestDtoValidator listOfTwoEmailRequestDtoValidator;
 
@@ -68,6 +71,13 @@ public class FriendRestController {
     public BaseResponseDto subscribe(@RequestBody @Valid TargetRequestorRequestDto req) {
         log.debug("[subscribe]-request={}", req);
         subscriptionService.subscribe(req.getTarget(), req.getRequestor());
+        return new SuccessResponseDto();
+    }
+
+    @PostMapping("/block")
+    public BaseResponseDto block(@RequestBody @Valid TargetRequestorRequestDto req) {
+        log.debug("[block]-request={}", req);
+        blockingService.block(req.getTarget(), req.getRequestor());
         return new SuccessResponseDto();
     }
 }

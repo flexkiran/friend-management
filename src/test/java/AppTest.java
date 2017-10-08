@@ -267,4 +267,45 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error").value("906"));
     }
+
+    @Test(groups = "/friend/block", dependsOnGroups = {"/friend/connect"})
+    public void createBlockingBetweenConnectedFriends_Success() throws Exception {
+        createBlocking_Success("andy@example.com", "john@example.com");
+    }
+
+    public void createBlocking_Success(String requestor, String target) throws Exception {
+        String json = toJson(ImmutableMap.of("requestor", requestor, "target", target));
+        mockMvc.perform(post("/friend/block").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test(groups = "/friend/block", dependsOnMethods = "createBlockingBetweenConnectedFriends_Success")
+    public void createBlockingBetweenConnectedFriends_BlockingRequestRepeatedApiException() throws Exception {
+        String json = toJson(ImmutableMap.of("requestor", "andy@example.com", "target", "john@example.com"));
+        mockMvc.perform(post("/friend/block").content(json).contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("907"));
+    }
+
+    // if they are not connected as friends, then no new friends connection can be added
+    @Test(groups = "/friend/block", dependsOnGroups = {"/friend/list"})
+    public void createFriendConnection_BlockedFriendApiException() throws Exception {
+        registerEmail_Success("blocked@example.com");
+        createBlocking_Success("andy@example.com", "blocked@example.com");
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com", "blocked@example.com")));
+        Locale locale = new Locale("en");
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error", is("908")))
+                .andExpect(jsonPath("$.message", is("Blocked friend")));
+    }
 }
