@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class ListOfTwoEmailsRequestDto {
 
-    @NotNull
+    @NotNull 
     @Size(min = 2, max = 2)
     private List<String> friends;
 }

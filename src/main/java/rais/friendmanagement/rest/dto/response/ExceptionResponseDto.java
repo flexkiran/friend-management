@@ -1,5 +1,6 @@
 package rais.friendmanagement.rest.dto.response;
 
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
@@ -22,5 +23,16 @@ public class ExceptionResponseDto extends BaseResponseDto {
     private String message;
     // error message language
     private String lang;
+    // validation errors
+    private List<ValidationError> validationErrors;
 
+    @Data
+    public static class ValidationError {
+
+        private String object;
+        private String field;
+        private Object rejectedValue;
+        private String message;
+        private String lang;
+    }
 }

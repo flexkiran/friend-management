@@ -1,6 +1,8 @@
 package rais.friendmanagement.exception;
 
+import java.text.MessageFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
@@ -19,5 +21,18 @@ public class InvalidRequestApiException extends ApiException {
 
     public InvalidRequestApiException(Throwable cause) {
         super(CODE, cause);
+    }
+
+    /**
+     * Bind to Spring validation errors
+     */
+    public void bindTo(Errors errors, String field, Object... messageArgs) {
+        String msg = getMessage();
+        if (messageArgs.length > 0) {
+            msg = MessageFormat.format(msg, messageArgs);
+            errors.rejectValue(field, getErrorCode(), messageArgs, msg);
+        } else {
+            errors.rejectValue(field, getErrorCode(), msg);
+        }
     }
 }

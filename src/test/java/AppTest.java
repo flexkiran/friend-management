@@ -65,12 +65,58 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.error", is("901")))
+                .andExpect(jsonPath("$.lang", is("in")))
                 .andExpect(jsonPath("$.message", is("Data tidak dapat diproses")));
     }
 
     @Test(groups = "/friend/connect")
     public void createFriendConnection_InvalidRequestApiException_NotNull() throws Exception {
-        String json = "{}";
+        String json = "{\"friends\":null}";
+        Locale locale = new Locale("in");
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("902")))
+                .andExpect(jsonPath("$.lang", is("in")))
+                .andExpect(jsonPath("$.message", is("Data tidak valid")))
+                .andExpect(jsonPath("$.validationErrors[?(@.field == 'friends' && @.message == 'Tidak boleh null')]").exists());
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_InvalidRequestApiException_Size() throws Exception {
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com")));
+        Locale locale = new Locale("en");
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("902")))
+                .andExpect(jsonPath("$.lang", is("en")))
+                .andExpect(jsonPath("$.message", is("Message not valid")))
+                .andExpect(jsonPath("$.validationErrors[?(@.field == 'friends' && @.message == 'Size must be between 2 and 2')]").exists());
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_InvalidEmailRequestApiException() throws Exception {
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("com")));
+        Locale locale = new Locale("in");
+        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.error", is("902")))
+                .andExpect(jsonPath("$.lang", is("in")))
+                .andExpect(jsonPath("$.message", is("Data tidak valid")))
+                .andExpect(jsonPath("$.validationErrors[?(@.field == 'friends[0]' && @.message == \"'com' bukan email yang valid\")]").exists());
+    }
+
+    @Test(groups = "/friend/connect")
+    public void createFriendConnection_NotUniqueRequestApiException() throws Exception {
+        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com", "andy@example.com")));
         Locale locale = Locale.ENGLISH;
         mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON).header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
                 .andDo(print())
@@ -78,16 +124,8 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.error", is("902")))
-                .andExpect(jsonPath("$.message", is("Message not valid")));
-    }
-
-    @Test(groups = "/friend/connect")
-    public void createFriendConnection_InvalidRequestApiException_Size() throws Exception {
-        String json = toJson(ImmutableMap.of("friends", Arrays.asList("andy@example.com")));
-        mockMvc.perform(post("/friend/connect").content(json).contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.success", is(false)));
+                .andExpect(jsonPath("$.lang", is("en")))
+                .andExpect(jsonPath("$.message", is("Message not valid")))
+                .andExpect(jsonPath("$.validationErrors[?(@.field == 'friends[1]' && @.message == \"'andy@example.com' is not unique\")]").exists());
     }
 }
