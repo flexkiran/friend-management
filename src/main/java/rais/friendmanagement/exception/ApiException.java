@@ -61,4 +61,13 @@ public class ApiException extends RuntimeException {
         return rb;
     }
     private static final Map<Locale, ResourceBundle> resourceBundleMap = new HashMap<>();
+
+    public static boolean isSupportedLocale(Locale locale) {
+        try {
+            getResourceBundle(locale);
+            return true;
+        } catch (MissingResourceException mre) {
+            return false;
+        }
+    }
 }

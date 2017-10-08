@@ -160,11 +160,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * resolve locale using the request header 'Accept-Language'
+     * resolve locale using the request header 'Accept-Language'. Using
+     * LanguageRange to parse complex lang string
+     * (eg:en,en-US;q=0.8,id;q=0.6,ms;q=0.4)
      */
     private Locale resolveLocale(WebRequest req) {
         String lang = req.getHeader(HttpHeaders.ACCEPT_LANGUAGE);
-        return lang == null ? Locale.getDefault() : new Locale(lang);
+        log.debug("[resolveLocale]-lang={}", lang);
+        if (lang == null) {
+            return Locale.getDefault();
+        }
+        return Locale.LanguageRange.parse(lang).stream()
+                .map(lr -> new Locale(lr.getRange()))
+                .filter(ApiException::isSupportedLocale)
+                .findFirst()
+                .orElse(Locale.getDefault());
     }
 
     private HttpStatus resolveAnnotatedResponseStatus(Exception ex) {
