@@ -1,5 +1,6 @@
 package rais.friendmanagement.exception;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -22,14 +23,24 @@ public class ApiException extends RuntimeException {
     private static final long serialVersionUID = -2193200205752285811L;
 
     private final String errorCode;
+    private final Object[] messageArgs;
 
     public ApiException(String errorCode) {
-        this(errorCode, null);
+        this(errorCode, null, null);
     }
 
-    public ApiException(String exceptionCode, Throwable cause) {
+    public ApiException(String errorCode, Object[] messageArgs) {
+        this(errorCode, null, messageArgs);
+    }
+
+    public ApiException(String errorCode, Throwable cause) {
+        this(errorCode, cause, null);
+    }
+
+    public ApiException(String errorCode, Throwable cause, Object[] messageArgs) {
         super(cause);
-        this.errorCode = exceptionCode;
+        this.errorCode = errorCode;
+        this.messageArgs = messageArgs;
     }
 
     @Override
@@ -39,7 +50,11 @@ public class ApiException extends RuntimeException {
 
     public String getLocalizedMessage(Locale locale) {
         try {
-            return getResourceBundle(locale).getString(getErrorCode());
+            String msg = getResourceBundle(locale).getString(getErrorCode());
+            if (messageArgs != null) {
+                msg = MessageFormat.format(msg, messageArgs);
+            }
+            return msg;
         } catch (MissingResourceException mre) {
             log.warn("[getLocalizedMessage]-returning the class name", mre);
             return getClass().getSimpleName();

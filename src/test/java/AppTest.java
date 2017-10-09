@@ -221,7 +221,7 @@ public class AppTest extends AbstractTestNGSpringContextTests {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.error", is("904")))
-                .andExpect(jsonPath("$.message", is("Email tidak terdaftar")));
+                .andExpect(jsonPath("$.message", is("Email asdf@fdsa.asdf tidak terdaftar")));
     }
 
     @Test(groups = "/friend/common", dependsOnGroups = {"/friend/list"})

@@ -13,8 +13,8 @@ public class EmailNotRegisteredApiException extends ApiException {
     private static final long serialVersionUID = -3972244432876685585L;
     public static final String CODE = "904";
 
-    public EmailNotRegisteredApiException() {
-        super(CODE);
+    public EmailNotRegisteredApiException(String email) {
+        super(CODE, new Object[]{email});
     }
 
 }

@@ -29,7 +29,7 @@ public class PersonServiceImpl implements PersonService {
     public Person findByEmailOrThrowEmailNotRegisteredApiException(String email) {
         Person p = personRepo.findByEmail(email);
         if (p == null) {
-            throw new EmailNotRegisteredApiException();
+            throw new EmailNotRegisteredApiException(email);
         }
         return p;
     }
